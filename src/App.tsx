@@ -1,9 +1,9 @@
-import { LoginPage } from './pages/LoginPage';
+import Routing from './routing/Routing';
 
 import './App.css';
 
 const App = () => {
-  return <LoginPage />;
+  return <Routing />;
 };
 
 export default App;
