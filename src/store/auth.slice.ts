@@ -3,11 +3,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { User, UserCredentials } from '../types/user.types';
 import { getUser } from '../services/usersService';
 
-type AuthState = {
+export type AuthState = {
   isLoggedIn: boolean;
   user: User | null;
   status: 'idle' | 'succeeded' | 'loading' | 'failed';
   error: string | null;
+  isLoading: boolean;
 };
 
 export const login = createAsyncThunk<
@@ -34,6 +35,7 @@ const initialState: AuthState = {
   user: null,
   status: 'idle',
   error: null,
+  isLoading: false,
 };
 
 const authSlice = createSlice({
@@ -49,14 +51,17 @@ const authSlice = createSlice({
     builder
       .addCase(login.pending, (state) => {
         state.status = 'loading';
+        state.isLoading = true;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload;
+        state.isLoading = false;
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload || 'Authorization failed';
+        state.isLoading = false;
       });
   },
 });
