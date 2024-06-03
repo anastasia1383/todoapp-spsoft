@@ -45,6 +45,8 @@ const authSlice = createSlice({
     logout: (state) => {
       state.isLoggedIn = false;
       state.user = null;
+      state.error = null;
+      state.status = 'idle';
     },
   },
   extraReducers: (builder) => {
@@ -52,11 +54,13 @@ const authSlice = createSlice({
       .addCase(login.pending, (state) => {
         state.status = 'loading';
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload;
         state.isLoading = false;
+        state.isLoggedIn = true;
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed';
