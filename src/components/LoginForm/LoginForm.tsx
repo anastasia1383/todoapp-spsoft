@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 import { UserCredentials } from '../../types/user.types';
 import { RootState, useAppDispatch, useAppSelector } from '../../store/store';
 import { login } from '../../store/auth.slice';
 
 export const LoginForm = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isLoading, error } = useAppSelector((state: RootState) => state.auth);
+  const { isLoggedIn, isLoading, error } = useAppSelector((state: RootState) => state.sessionData);
 
   const {
     register,
@@ -25,6 +27,12 @@ export const LoginForm = () => {
       setError('email', { message: error });
     }
   }, [error, setError]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/todos');
+    }
+  }, [isLoggedIn, navigate]);
 
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">

@@ -20,8 +20,6 @@ export const login = createAsyncThunk<
     const { email } = credentials;
     const data = await getUser(email);
 
-    localStorage.setItem('sessionData', JSON.stringify(data));
-
     return data;
   } catch (e: unknown) {
     const error = e as Error;
@@ -48,6 +46,14 @@ const authSlice = createSlice({
       state.error = null;
       state.status = 'idle';
     },
+    initializeAuthState: (state, action) => {
+      const userData = action.payload;
+      if (userData) {
+        state.isLoggedIn = true;
+        state.user = userData;
+        state.status = 'succeeded';
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -66,10 +72,11 @@ const authSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload || 'Authorization failed';
         state.isLoading = false;
+        state.isLoggedIn = false;
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, initializeAuthState } = authSlice.actions;
 
 export default authSlice.reducer;
