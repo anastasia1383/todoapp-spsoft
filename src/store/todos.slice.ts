@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { GetTodosPayload, Todo, TodoPayload } from '../types/todo.types';
+import type {
+  GetTodosPayload,
+  TodoModel,
+  Todo,
+  TodoPayload,
+} from '../types/todo.types';
 import {
   addTodos,
   deleteTodos,
@@ -18,6 +23,7 @@ export type TodosState = {
   todos: Todo[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   errors: TodoStateErrors;
+  shouldLoadTodos: boolean;
 };
 
 const initialState: TodosState = {
@@ -29,6 +35,7 @@ const initialState: TodosState = {
     update: null,
     remove: null,
   },
+  shouldLoadTodos: true,
 };
 
 export const fetchTodos = createAsyncThunk<
@@ -61,12 +68,17 @@ export const createTodo = createAsyncThunk<
 
 export const editTodo = createAsyncThunk<
   Todo,
-  Partial<Todo>,
+  Partial<TodoModel>,
   { rejectValue: string }
 >('todos/editTodo', async (todo, { rejectWithValue }) => {
   try {
     const data = await updateTodos(todo);
-    return data;
+    const newTodo = {
+      ...data,
+      updatedAt: Date.now().toString(),
+    }
+    
+    return newTodo;
   } catch (e: unknown) {
     const error = e as Error;
     return rejectWithValue(error.message);
@@ -90,7 +102,19 @@ export const removeTodo = createAsyncThunk<
 const todosSlice = createSlice({
   name: 'todos',
   initialState,
-  reducers: {},
+  reducers: {
+    reset: (state) => {
+      state.todos = [];
+      state.status = 'idle';
+      state.errors = {
+        load: null,
+        create: null,
+        update: null,
+        remove: null,
+      };
+      state.shouldLoadTodos = true;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTodos.pending, (state) => {
@@ -101,6 +125,7 @@ const todosSlice = createSlice({
         state.status = 'succeeded';
         state.todos = action.payload;
         state.errors.load = null;
+        state.shouldLoadTodos = false;
       })
       .addCase(fetchTodos.rejected, (state, action) => {
         state.status = 'failed';
@@ -154,5 +179,7 @@ const todosSlice = createSlice({
       });
   },
 });
+
+export const { reset } = todosSlice.actions;
 
 export default todosSlice.reducer;
