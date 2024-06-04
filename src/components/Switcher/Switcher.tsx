@@ -1,13 +1,9 @@
-import { useState } from 'react';
+interface SwitcherProps {
+  isChecked: boolean;
+  handleCheckboxChange: () => void;
+}
 
-export const Switcher = () => {
-  const [isChecked, setIsChecked] = useState(false);
-
-  const handleCheckboxChange = () => {
-    console.log(isChecked);
-    setIsChecked(!isChecked);
-  };
-
+export const Switcher: React.FC<SwitcherProps> = ({isChecked, handleCheckboxChange}) => {
   return (
     <label className="flex cursor-pointer select-none items-center">
       <div className="relative">

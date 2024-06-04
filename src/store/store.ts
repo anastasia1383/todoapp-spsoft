@@ -17,6 +17,7 @@ import {
 
 import authSlice, { AuthState } from './auth.slice';
 import todosSlice, { TodosState } from './todos.slice';
+import permissionsSlice, {PermissionState} from './permissions.slice';
 
 const sessionPersistConfig: PersistConfig<AuthState> = {
   key: 'sessionData',
@@ -30,10 +31,17 @@ const todosPersistConfig: PersistConfig<TodosState> = {
   stateReconciler: hardSet,
 };
 
+const permissionsConfig: PersistConfig<PermissionState> = {
+  key: 'permissions',
+  storage,
+  stateReconciler: hardSet,
+};
+
 
 const reducer = combineReducers({
   sessionData: persistReducer(sessionPersistConfig, authSlice),
   todos: persistReducer(todosPersistConfig, todosSlice),
+  permissions: persistReducer(permissionsConfig, permissionsSlice),
 });
 
 const store = configureStore({
