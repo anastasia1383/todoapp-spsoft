@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
 import type {
   GetTodosPayload,
   TodoModel,
@@ -24,6 +25,7 @@ export type TodosState = {
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   errors: TodoStateErrors;
   shouldLoadTodos: boolean;
+  isLoading: boolean;
 };
 
 const initialState: TodosState = {
@@ -36,6 +38,7 @@ const initialState: TodosState = {
     remove: null,
   },
   shouldLoadTodos: true,
+  isLoading: false,
 };
 
 export const fetchTodos = createAsyncThunk<
@@ -58,7 +61,9 @@ export const createTodo = createAsyncThunk<
   { rejectValue: string }
 >('todos/createTodo', async (newTodo, { rejectWithValue }) => {
   try {
+    console.log('new todo', newTodo);
     const data = await addTodos(newTodo);
+    console.log('new todo data', data);
     return data;
   } catch (e: unknown) {
     const error = e as Error;
@@ -72,13 +77,13 @@ export const editTodo = createAsyncThunk<
   { rejectValue: string }
 >('todos/editTodo', async (todo, { rejectWithValue }) => {
   try {
-    const data = await updateTodos(todo);
-    const newTodo = {
-      ...data,
-      updatedAt: Date.now().toString(),
-    }
+    console.log('todo', todo);
     
-    return newTodo;
+    const data = await updateTodos(todo);
+
+    console.log('data', data);
+    
+    return data;
   } catch (e: unknown) {
     const error = e as Error;
     return rejectWithValue(error.message);
@@ -120,33 +125,40 @@ const todosSlice = createSlice({
       .addCase(fetchTodos.pending, (state) => {
         state.status = 'loading';
         state.errors.load = null;
+        state.isLoading = true;
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.todos = action.payload;
         state.errors.load = null;
         state.shouldLoadTodos = false;
+        state.isLoading = false;
       })
       .addCase(fetchTodos.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.load = action.payload || 'Failed to fetch todos';
+        state.isLoading = false;
       })
       .addCase(createTodo.pending, (state) => {
         state.status = 'loading';
         state.errors.create = null;
+        state.isLoading = true;
       })
       .addCase(createTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.todos.push(action.payload);
         state.errors.create = null;
+        state.isLoading = false;
       })
       .addCase(createTodo.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.create = action.payload || 'Failed to create todo';
+        state.isLoading = false;
       })
       .addCase(editTodo.pending, (state) => {
         state.status = 'loading';
         state.errors.update = null;
+        state.isLoading = true;
       })
       .addCase(editTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
@@ -157,14 +169,17 @@ const todosSlice = createSlice({
           state.todos[index] = action.payload;
         }
         state.errors.update = null;
+        state.isLoading = false;
       })
       .addCase(editTodo.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.update = action.payload || 'Failed to edit todo';
+        state.isLoading = false;
       })
       .addCase(removeTodo.pending, (state) => {
         state.status = 'loading';
         state.errors.remove = null;
+        state.isLoading = true;
       })
       .addCase(removeTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
@@ -172,10 +187,12 @@ const todosSlice = createSlice({
           (todo) => todo.id !== action.payload.id
         );
         state.errors.remove = null;
+        state.isLoading = false;
       })
       .addCase(removeTodo.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.remove = action.payload || 'Failed to delete todo';
+        state.isLoading = false;
       });
   },
 });

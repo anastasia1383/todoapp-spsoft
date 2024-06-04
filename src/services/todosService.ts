@@ -1,3 +1,4 @@
+import { generateTodoId } from '../helpers/generateTodoId';
 import { mapTodoResponse } from '../helpers/mapTodosResponse';
 import { TodoModel, TodoPayload, Todo } from '../types/todo.types';
 import { client } from './apiService';
@@ -9,17 +10,24 @@ export const getTodos = async (userId: number): Promise<Todo[]> => {
 };
 
 export const addTodos = async (data: TodoPayload): Promise<Todo> => {
-  const { userId, ...newTodo } = data;
-  const response = await client.post<TodoModel>(`/users/${userId}/todos`, newTodo);
+  const { userId } = data;
+  const response = await client.post<TodoModel>(`/users/${userId}/todos`, data);
 
-  return mapTodoResponse(response);
+  const newTodo = mapTodoResponse({ ...response, ...data });
+  newTodo.id = generateTodoId();
+  newTodo.completed = false;
+
+  return newTodo;
 };
 
 export const updateTodos = async (data: Partial<TodoModel>): Promise<Todo> => {
-  const { id, ...updatedTodo } = data;
-  const response = await client.patch<TodoModel>(`/todos/${id}`, updatedTodo);
+  const { id, ...todo } = data;
+  const response = await client.patch<TodoModel>(`/todos/${id}`, todo);
 
-  return mapTodoResponse(response);
+  const updatedTodo = mapTodoResponse({ ...response, ...data });
+  updatedTodo.updatedAt = new Date().toString();
+
+  return updatedTodo;
 };
 
 export const deleteTodos = async (data: Partial<TodoModel>): Promise<Todo> => {
