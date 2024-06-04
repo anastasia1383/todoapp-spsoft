@@ -1,5 +1,6 @@
 import { logout } from '../../store/auth.slice';
 import { useAppDispatch, useAppSelector } from '../../store/store';
+import { reset } from '../../store/todos.slice';
 import { Switcher } from '../Switcher/Switcher';
 
 export const Profile = () => {
@@ -7,6 +8,7 @@ export const Profile = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(reset());
   };
 
   const userName = useAppSelector((state) => state.sessionData.user?.name);
@@ -20,7 +22,7 @@ export const Profile = () => {
       >
         Logout
       </button>
-      <Switcher/>
+      <Switcher />
     </div>
   );
 };
