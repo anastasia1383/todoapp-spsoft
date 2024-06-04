@@ -12,19 +12,28 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
+  PersistConfig,
 } from 'redux-persist';
 
-import authSlice from './auth.slice';
+import authSlice, { AuthState } from './auth.slice';
+import todosSlice, { TodosState } from './todos.slice';
 
-const persistConfig = {
+const sessionPersistConfig: PersistConfig<AuthState> = {
   key: 'sessionData',
-  version: 1,
   storage,
   stateReconciler: hardSet,
 };
 
+const todosPersistConfig: PersistConfig<TodosState> = {
+  key: 'todos',
+  storage,
+  stateReconciler: hardSet,
+};
+
+
 const reducer = combineReducers({
-  sessionData: persistReducer(persistConfig, authSlice),
+  sessionData: persistReducer(sessionPersistConfig, authSlice),
+  todos: persistReducer(todosPersistConfig, todosSlice),
 });
 
 const store = configureStore({
