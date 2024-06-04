@@ -61,9 +61,7 @@ export const createTodo = createAsyncThunk<
   { rejectValue: string }
 >('todos/createTodo', async (newTodo, { rejectWithValue }) => {
   try {
-    console.log('new todo', newTodo);
     const data = await addTodos(newTodo);
-    console.log('new todo data', data);
     return data;
   } catch (e: unknown) {
     const error = e as Error;
@@ -73,19 +71,18 @@ export const createTodo = createAsyncThunk<
 
 export const editTodo = createAsyncThunk<
   Todo,
-  Partial<TodoModel>,
+  {todo: Partial<TodoModel>, updateDate: boolean},
   { rejectValue: string }
->('todos/editTodo', async (todo, { rejectWithValue }) => {
-  try {
-    console.log('todo', todo);
-    
-    const data = await updateTodos(todo);
+>('todos/editTodo', async (payload, { rejectWithValue }) => {
+  const { todo, updateDate  } = payload;
 
-    console.log('data', data);
-    
+  try {
+    const data = await updateTodos(todo, updateDate);
+
     return data;
   } catch (e: unknown) {
     const error = e as Error;
+    
     return rejectWithValue(error.message);
   }
 });

@@ -5,7 +5,6 @@ import { client } from './apiService';
 
 export const getTodos = async (userId: number): Promise<Todo[]> => {
   const response = await client.get<TodoModel[]>(`/users/${userId}/todos`);
-
   return response.map(mapTodoResponse);
 };
 
@@ -20,13 +19,15 @@ export const addTodos = async (data: TodoPayload): Promise<Todo> => {
   return newTodo;
 };
 
-export const updateTodos = async (data: Partial<TodoModel>): Promise<Todo> => {
+export const updateTodos = async (data: Partial<TodoModel>, updateDate: boolean): Promise<Todo> => {
   const { id, ...todo } = data;
   const response = await client.patch<TodoModel>(`/todos/${id}`, todo);
-
   const updatedTodo = mapTodoResponse({ ...response, ...data });
-  updatedTodo.updatedAt = new Date().toString();
-
+  
+  if (updateDate) {
+    updatedTodo.updatedAt = Date.now().toString();
+  }
+  
   return updatedTodo;
 };
 
