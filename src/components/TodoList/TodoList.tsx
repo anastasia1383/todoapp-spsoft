@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTimes } from '@fortawesome/free-solid-svg-icons';
+import classNames from 'classnames';
 
 import { RootState, useAppDispatch, useAppSelector } from '../../store/store';
-import { editTodo, fetchTodos } from '../../store/todos.slice';
+import { editTodo, fetchTodos, removeTodo } from '../../store/todos.slice';
 import { sortTodos } from '../../helpers/sortTodos';
 import { Todo } from '../../types/todo.types';
 
@@ -83,14 +84,27 @@ export const TodoList = () => {
     setTodoValues((prev) => ({ ...prev, [todoId]: e.target.value }));
   };
 
+  const handleDeleteTodo = (todo: Todo) => {
+    const deletePayload = {
+      ...todo,
+      deleted: true,
+    };
+    dispatch(removeTodo(deletePayload));
+  };
+
   return (
-    <div className="flex flex-col gap-2 bg-white shadow-md p-4">
-      <h1>Todos</h1>
+    <div className="flex flex-col gap-2 bg-white shadow-md">
+      <h1 className='px-4'>Todos</h1>
       {status === 'failed' && <p>{errors.load}</p>}
 
       <ul className="divide-y">
         {sortedTodos.map((todo) => (
-          <li key={todo.id} className="py-2 flex items-center min-h-14">
+          <li
+            key={todo.id}
+            className={classNames('py-2 flex items-center min-h-14 p-4', {
+              'bg-gray-100 text-gray-500': todo.deleted === true,
+            })}
+          >
             {isLoading.includes(todo.id) ? (
               <p>Loading...</p>
             ) : (
@@ -102,7 +116,9 @@ export const TodoList = () => {
                     onCheckComplete(todo);
                   }}
                   className="mr-2"
+                  disabled={todo.deleted === true}
                 />
+
                 {editMode[todo.id] ? (
                   <input
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 p-2"
@@ -116,14 +132,17 @@ export const TodoList = () => {
                 ) : (
                   <p>{todo.title}</p>
                 )}
-                <div className="flex gap-2 ml-auto pl-2">
-                  <button onClick={() => handleEditTodo(todo)}>
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button>
-                    <FontAwesomeIcon icon={faTimes} />
-                  </button>
-                </div>
+
+                {todo.deleted === false && (
+                  <div className="flex gap-2 ml-auto pl-2">
+                    <button onClick={() => handleEditTodo(todo)}>
+                      <FontAwesomeIcon icon={faEdit} />
+                    </button>
+                    <button onClick={() => handleDeleteTodo(todo)}>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </li>

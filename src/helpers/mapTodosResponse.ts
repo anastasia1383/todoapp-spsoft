@@ -7,6 +7,7 @@ export const mapTodoResponse = (todo: Todo): Todo => {
     title: todo.title,
     completed: todo.completed,
     createdAt: todo.createdAt || Date.now().toString(),
+    deleted: todo.deleted || false,
   };
 
   if (todo.updatedAt) {

@@ -5,6 +5,7 @@ export interface Todo {
   completed: boolean;
   createdAt: string;
   updatedAt?: string;
+  deleted: boolean;
 }
 
 export interface TodoPayload {

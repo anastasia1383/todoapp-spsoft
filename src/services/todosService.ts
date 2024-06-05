@@ -19,21 +19,27 @@ export const addTodos = async (data: TodoPayload): Promise<Todo> => {
   return newTodo;
 };
 
-export const updateTodos = async (data: Partial<Todo>, updateDate: boolean): Promise<Todo> => {
+export const updateTodos = async (
+  data: Partial<Todo>,
+  updateDate: boolean
+): Promise<Todo> => {
   const { id, ...todo } = data;
   const response = await client.patch<Todo>(`/todos/${id}`, todo);
   const updatedTodo = mapTodoResponse({ ...response, ...data });
-  
+
   if (updateDate) {
     updatedTodo.updatedAt = Date.now().toString();
   }
-  
+
   return updatedTodo;
 };
 
-export const deleteTodos = async (data: Partial<Todo>): Promise<Todo> => {
+export const deleteTodos = async (data: Todo): Promise<Todo> => {
   const { id } = data;
-  const response = await client.delete<Todo>(`/todos/${id}`);
+  await client.delete<Todo>(`/todos/${id}`);
 
-  return mapTodoResponse(response);
+  const mappedTodo = mapTodoResponse(data);
+  mappedTodo.deleted = true;
+
+  return mappedTodo;
 };

@@ -86,11 +86,12 @@ export const editTodo = createAsyncThunk<
 
 export const removeTodo = createAsyncThunk<
   Todo,
-  Partial<Todo>,
+  Todo,
   { rejectValue: string }
 >('todos/removeTodo', async (todo, { rejectWithValue }) => {
   try {
     const data = await deleteTodos(todo);
+    console.log(data);
     return data;
   } catch (e: unknown) {
     const error = e as Error;
@@ -170,15 +171,26 @@ const todosSlice = createSlice({
         state.status = 'failed';
         state.errors.update = action.payload || 'Failed to edit todo';
       })
-      .addCase(removeTodo.pending, (state) => {
+      .addCase(removeTodo.pending, (state, action) => {
         state.status = 'loading';
         state.errors.remove = null;
+        const todoId = action.meta.arg.id;
+        if (todoId !== undefined) {
+          state.isLoading.push(todoId);
+        }
       })
       .addCase(removeTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.todos = state.todos.filter(
-          (todo) => todo.id !== action.payload.id
+        console.log(action.payload);
+
+        const index = state.todos.findIndex(
+          (todo) => todo.id === action.payload.id
         );
+        if (index !== -1) {
+          state.todos[index] = action.payload;
+        }
+        const todoId = action.payload.id;
+        state.isLoading = state.isLoading.filter((id) => id !== todoId);
         state.errors.remove = null;
       })
       .addCase(removeTodo.rejected, (state, action) => {
