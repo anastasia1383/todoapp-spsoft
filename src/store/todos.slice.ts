@@ -1,10 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type {
-  GetTodosPayload,
-  TodoModel,
-  Todo,
-  TodoPayload,
-} from '../types/todo.types';
+
+import type { GetTodosPayload, Todo, TodoPayload } from '../types/todo.types';
 import {
   addTodos,
   deleteTodos,
@@ -24,6 +20,8 @@ export type TodosState = {
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   errors: TodoStateErrors;
   shouldLoadTodos: boolean;
+  isLoading: number[];
+  isAdding: boolean;
 };
 
 const initialState: TodosState = {
@@ -36,6 +34,8 @@ const initialState: TodosState = {
     remove: null,
   },
   shouldLoadTodos: true,
+  isLoading: [],
+  isAdding: false,
 };
 
 export const fetchTodos = createAsyncThunk<
@@ -68,26 +68,25 @@ export const createTodo = createAsyncThunk<
 
 export const editTodo = createAsyncThunk<
   Todo,
-  Partial<TodoModel>,
+  { todo: Partial<Todo>; updateDate: boolean },
   { rejectValue: string }
->('todos/editTodo', async (todo, { rejectWithValue }) => {
+>('todos/editTodo', async (payload, { rejectWithValue }) => {
+  const { todo, updateDate } = payload;
+
   try {
-    const data = await updateTodos(todo);
-    const newTodo = {
-      ...data,
-      updatedAt: Date.now().toString(),
-    }
-    
-    return newTodo;
+    const data = await updateTodos(todo, updateDate);
+
+    return data;
   } catch (e: unknown) {
     const error = e as Error;
+
     return rejectWithValue(error.message);
   }
 });
 
 export const removeTodo = createAsyncThunk<
   Todo,
-  Partial<Todo>,
+  Todo,
   { rejectValue: string }
 >('todos/removeTodo', async (todo, { rejectWithValue }) => {
   try {
@@ -134,19 +133,26 @@ const todosSlice = createSlice({
       .addCase(createTodo.pending, (state) => {
         state.status = 'loading';
         state.errors.create = null;
+        state.isAdding = true;
       })
       .addCase(createTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.todos.push(action.payload);
         state.errors.create = null;
+        state.isAdding = false;
       })
       .addCase(createTodo.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.create = action.payload || 'Failed to create todo';
+        state.isAdding = false;
       })
-      .addCase(editTodo.pending, (state) => {
+      .addCase(editTodo.pending, (state, action) => {
         state.status = 'loading';
         state.errors.update = null;
+        const todoId = action.meta.arg.todo.id;
+        if (todoId !== undefined) {
+          state.isLoading.push(todoId);
+        }
       })
       .addCase(editTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
@@ -157,20 +163,31 @@ const todosSlice = createSlice({
           state.todos[index] = action.payload;
         }
         state.errors.update = null;
+        const todoId = action.payload.id;
+        state.isLoading = state.isLoading.filter((id) => id !== todoId);
       })
       .addCase(editTodo.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.update = action.payload || 'Failed to edit todo';
       })
-      .addCase(removeTodo.pending, (state) => {
+      .addCase(removeTodo.pending, (state, action) => {
         state.status = 'loading';
         state.errors.remove = null;
+        const todoId = action.meta.arg.id;
+        if (todoId !== undefined) {
+          state.isLoading.push(todoId);
+        }
       })
       .addCase(removeTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.todos = state.todos.filter(
-          (todo) => todo.id !== action.payload.id
+        const index = state.todos.findIndex(
+          (todo) => todo.id === action.payload.id
         );
+        if (index !== -1) {
+          state.todos[index] = action.payload;
+        }
+        const todoId = action.payload.id;
+        state.isLoading = state.isLoading.filter((id) => id !== todoId);
         state.errors.remove = null;
       })
       .addCase(removeTodo.rejected, (state, action) => {

@@ -1,30 +1,45 @@
+import { generateTodoId } from '../helpers/generateTodoId';
 import { mapTodoResponse } from '../helpers/mapTodosResponse';
-import { TodoModel, TodoPayload, Todo } from '../types/todo.types';
+import { TodoPayload, Todo } from '../types/todo.types';
 import { client } from './apiService';
 
 export const getTodos = async (userId: number): Promise<Todo[]> => {
-  const response = await client.get<TodoModel[]>(`/users/${userId}/todos`);
-
+  const response = await client.get<Todo[]>(`/users/${userId}/todos`);
   return response.map(mapTodoResponse);
 };
 
 export const addTodos = async (data: TodoPayload): Promise<Todo> => {
-  const { userId, ...newTodo } = data;
-  const response = await client.post<TodoModel>(`/users/${userId}/todos`, newTodo);
+  const { userId } = data;
+  const response = await client.post<Todo>(`/users/${userId}/todos`, data);
 
-  return mapTodoResponse(response);
+  const newTodo = mapTodoResponse({ ...response, ...data });
+  newTodo.id = generateTodoId();
+  newTodo.completed = false;
+
+  return newTodo;
 };
 
-export const updateTodos = async (data: Partial<TodoModel>): Promise<Todo> => {
-  const { id, ...updatedTodo } = data;
-  const response = await client.patch<TodoModel>(`/todos/${id}`, updatedTodo);
+export const updateTodos = async (
+  data: Partial<Todo>,
+  updateDate: boolean
+): Promise<Todo> => {
+  const { id, ...todo } = data;
+  const response = await client.patch<Todo>(`/todos/${id}`, todo);
+  const updatedTodo = mapTodoResponse({ ...response, ...data });
 
-  return mapTodoResponse(response);
+  if (updateDate) {
+    updatedTodo.updatedAt = Date.now().toString();
+  }
+
+  return updatedTodo;
 };
 
-export const deleteTodos = async (data: Partial<TodoModel>): Promise<Todo> => {
+export const deleteTodos = async (data: Todo): Promise<Todo> => {
   const { id } = data;
-  const response = await client.delete<TodoModel>(`/todos/${id}`);
+  await client.delete<Todo>(`/todos/${id}`);
 
-  return mapTodoResponse(response);
+  const mappedTodo = mapTodoResponse(data);
+  mappedTodo.deleted = true;
+
+  return mappedTodo;
 };

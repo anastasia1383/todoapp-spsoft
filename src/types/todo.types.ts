@@ -1,10 +1,3 @@
-export interface TodoModel {
-  userId: number;
-  id: number;
-  title: string;
-  completed: boolean;
-}
-
 export interface Todo {
   userId: number;
   id: number;
@@ -12,6 +5,7 @@ export interface Todo {
   completed: boolean;
   createdAt: string;
   updatedAt?: string;
+  deleted: boolean;
 }
 
 export interface TodoPayload {
