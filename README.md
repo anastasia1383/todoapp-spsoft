@@ -1,30 +1,55 @@
-# React + TypeScript + Vite
+# TODO Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Summary
 
-Currently, two official plugins are available:
+This TODO application is built using React, Redux, and TypeScript. A simple TODO list manager that includes user authentication, permission-based editing, and item management. 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [DEMO](https://anastasia1383.github.io/todoapp-spsoft)
 
-## Expanding the ESLint configuration
+### Fake API and Local Storage Usage
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Fake API**: The application utilizes JSONPlaceholder (https://jsonplaceholder.typicode.com/) as a mock server to simulate backend interactions such as user authentication and permission checks.
+  
+- **Local Storage**: Adding, editing, and deleting TODO items are implemented using local storage. User authentication details and TODO items are stored locally during a session. However, changes made during the session won't persist after logging out.
 
-- Configure the top-level `parserOptions` property like this:
+This setup ensures a smooth user experience within a single session while maintaining data integrity and security.
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+## Mocked data
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- User with permissions: Sincere@april.biz
+- User without permissions: Shanna@melissa.tv
+
+## Features
+
+1. **User Authentication**
+   - Simulates user login.
+   - Redirects to TODO list page on success or unauthorized page on failure.
+
+2. **TODO List Management**
+   - Users can check/uncheck items.
+   - Checked items move to the bottom, unchecked items move to the top above checked items.
+
+3. **Edit Mode**
+   - 'Edit' toggle button for entering edit mode.
+   - Simulates server call to check permissions.
+   - If permitted, users can add new items, and edit items and remove existing items.
+   - Removed items are grayed out and visible only in edit mode.
+
+## Technologies Used
+
+### Frontend:
+- React: 18.2.0
+- React DOM: 18.2.0
+- React Router DOM: 6.23.1
+- Redux Toolkit: 2.2.5
+- React Redux: 9.1.2
+- React Hook Form: 7.51.5
+
+### State Management:
+- Redux Persist: 6.0.0
+
+### Build Tools:
+- Vite: 5.2.0
+- TypeScript: 5.2.2
+- ESLint: 8.57.0
+- TailwindCSS: 3.4.3
