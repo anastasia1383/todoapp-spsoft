@@ -1,7 +1,8 @@
 {
-  "name": "todospsoft",
+  "name": "todoapp-spsoft",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://anastasia1383.github.io/todoapp-spsoft/",
   "type": "module",
   "scripts": {
     "dev": "vite",

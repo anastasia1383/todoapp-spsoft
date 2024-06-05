@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from './ProtectedRoute';
 import { LoginPage } from '../pages/LoginPage';
@@ -7,9 +7,10 @@ import { NotFoundPage } from '../pages/NotFoundPage';
 
 const Routing = () => {
   return (
-    <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route
+    <BrowserRouter basename="/todoapp-spsoft/">
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route
           path="/todos"
           element={
             <ProtectedRoute>
@@ -17,9 +18,10 @@ const Routing = () => {
             </ProtectedRoute>
           }
         />
-      <Route path="/not-found" element={<NotFoundPage />} />
-      <Route path="*" element={<Navigate replace to="/not-found" />} />
-    </Routes>
+        <Route path="/not-found" element={<NotFoundPage />} />
+        <Route path="*" element={<Navigate replace to="/not-found" />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
