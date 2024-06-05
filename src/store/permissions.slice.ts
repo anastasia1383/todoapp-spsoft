@@ -18,7 +18,7 @@ export const checkUserPermissions = createAsyncThunk<
   PermissionsResponse,
   PermissionsRequest,
   { rejectValue: string }
->('auth/checkPermissions', async (req, { rejectWithValue }) => {
+>('permissions/checkPermissions', async (req, { rejectWithValue }) => {
   try {
     const data = await checkPermissions(req);
     return data;
@@ -36,8 +36,8 @@ const initialState: PermissionState = {
   permissions: [],
 };
 
-const authSlice = createSlice({
-  name: 'auth',
+const permissionsSlice = createSlice({
+  name: 'permissions',
   initialState,
   reducers: {
     resetPermissions: (state) => {
@@ -69,6 +69,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { resetPermissions } = authSlice.actions;
+export const { resetPermissions } = permissionsSlice.actions;
 
-export default authSlice.reducer;
+export default permissionsSlice.reducer;

@@ -6,25 +6,27 @@ import { checkUserPermissions, resetPermissions } from '../../store/permissions.
 import { reset } from '../../store/todos.slice';
 import { Switcher } from '../Switcher/Switcher';
 import { GuardedActions } from '../../types/user.types';
+import { resetEditingMode, setEditingMode } from '../../store/setting.slice';
 
 export const Profile = () => {
-  const [isEditMode, setIsEditMode] = useState(false);
   const [permissionsRequested, setPermissionsRequested] = useState(false);
   const [switcherTouched, setSwitcherTouched] = useState(false);
 
-  const user = useAppSelector((state) => state.sessionData.user);
   const dispatch = useAppDispatch();
 
+  const user = useAppSelector((state) => state.sessionData.user);
+  const { permissions, error } = useAppSelector((state) => state.permissions);
+  const isEditMode = useAppSelector((state) => state.settings.editingMode);
+  
   const handleLogout = () => {
     dispatch(logout());
     dispatch(reset());
     dispatch(resetPermissions());
+    dispatch(resetEditingMode());
   };
 
-  const { permissions, error } = useAppSelector((state) => state.permissions);
-
   useEffect(() => {
-    if (permissionsRequested && !permissions.length) {
+    if (permissionsRequested) {
       dispatch(
         checkUserPermissions({
           id: user!.id,
@@ -36,16 +38,18 @@ export const Profile = () => {
 
   useEffect(() => {
     if (permissionsRequested && permissions.includes(GuardedActions.EDIT)) {
-      setIsEditMode(permissions.includes(GuardedActions.EDIT));
+      dispatch(setEditingMode(true));
+    } else {
+      dispatch(setEditingMode(false));
     }
-  }, [permissionsRequested, permissions.length]);
+  }, [permissionsRequested, permissions, dispatch]);
 
   const handleCheckboxChange = () => {
     setSwitcherTouched(true);
     if (!isEditMode) {
-      setPermissionsRequested(!permissionsRequested);
+      setPermissionsRequested(true);
     } else {
-      setIsEditMode(false);
+      dispatch(setEditingMode(false));
       setPermissionsRequested(false);
     }
   };

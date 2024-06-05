@@ -91,7 +91,6 @@ export const removeTodo = createAsyncThunk<
 >('todos/removeTodo', async (todo, { rejectWithValue }) => {
   try {
     const data = await deleteTodos(todo);
-    console.log(data);
     return data;
   } catch (e: unknown) {
     const error = e as Error;
@@ -181,8 +180,6 @@ const todosSlice = createSlice({
       })
       .addCase(removeTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        console.log(action.payload);
-
         const index = state.todos.findIndex(
           (todo) => todo.id === action.payload.id
         );

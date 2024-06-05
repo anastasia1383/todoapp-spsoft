@@ -7,6 +7,7 @@ import { RootState, useAppDispatch, useAppSelector } from '../../store/store';
 import { editTodo, fetchTodos, removeTodo } from '../../store/todos.slice';
 import { sortTodos } from '../../helpers/sortTodos';
 import { Todo } from '../../types/todo.types';
+import { GuardedActions } from '../../types/user.types';
 
 export const TodoList = () => {
   const dispatch = useAppDispatch();
@@ -92,13 +93,24 @@ export const TodoList = () => {
     dispatch(removeTodo(deletePayload));
   };
 
+  const editingMode = useAppSelector((state) => state.settings.editingMode);
+  const permissions = useAppSelector((state) => state.permissions.permissions);
+
+  const hasEditPermission = permissions.includes(GuardedActions.EDIT);
+
+  const visibleTodos = useMemo(() => {
+    return editingMode
+      ? sortedTodos
+      : sortedTodos.filter((todo) => !todo.deleted);
+  }, [sortedTodos, editingMode]);
+
   return (
     <div className="flex flex-col gap-2 bg-white shadow-md">
       <h1 className='px-4'>Todos</h1>
       {status === 'failed' && <p>{errors.load}</p>}
 
       <ul className="divide-y">
-        {sortedTodos.map((todo) => (
+        {visibleTodos.map((todo) => (
           <li
             key={todo.id}
             className={classNames('py-2 flex items-center min-h-14 p-4', {
@@ -133,7 +145,7 @@ export const TodoList = () => {
                   <p>{todo.title}</p>
                 )}
 
-                {todo.deleted === false && (
+                {todo.deleted === false && editingMode && hasEditPermission && (
                   <div className="flex gap-2 ml-auto pl-2">
                     <button onClick={() => handleEditTodo(todo)}>
                       <FontAwesomeIcon icon={faEdit} />
