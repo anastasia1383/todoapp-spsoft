@@ -5,11 +5,11 @@ import { faEdit, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { RootState, useAppDispatch, useAppSelector } from '../../store/store';
 import { editTodo, fetchTodos } from '../../store/todos.slice';
 import { sortTodos } from '../../helpers/sortTodos';
-import { TodoModel } from '../../types/todo.types';
+import { Todo } from '../../types/todo.types';
 
 export const TodoList = () => {
   const dispatch = useAppDispatch();
-  const { todos, status, errors, shouldLoadTodos } = useAppSelector(
+  const { todos, status, errors, shouldLoadTodos, isLoading } = useAppSelector(
     (state: RootState) => state.todos
   );
   const [editMode, setEditMode] = useState<{ [key: string]: boolean }>({});
@@ -35,11 +35,11 @@ export const TodoList = () => {
     return sortTodos(todos);
   }, [todos]);
 
-  const updateTodo = (todo: Partial<TodoModel>, updateDate = true) => {
+  const updateTodo = (todo: Partial<Todo>, updateDate = true) => {
     dispatch(editTodo({ todo, updateDate }));
   };
 
-  const onCheckComplete = (todo: TodoModel) => {
+  const onCheckComplete = (todo: Todo) => {
     const updatePayload = {
       ...todo,
       completed: !todo.completed,
@@ -48,28 +48,31 @@ export const TodoList = () => {
     updateTodo(updatePayload);
   };
 
-  const handleEditTodo = (todo: TodoModel) => {
+  const handleEditTodo = (todo: Todo) => {
     setEditMode((prev) => ({ ...prev, [todo.id]: true }));
   };
 
-  const handleSaveTodo = (todo: TodoModel) => {
+  const handleSaveTodo = (todo: Todo) => {
     const updatedTodo = { ...todo, title: todoValues[todo.id] };
     updateTodo(updatedTodo, false);
-    // dispatch(editTodo(updatedTodo));
     setEditMode((prev) => ({ ...prev, [todo.id]: false }));
   };
 
-  const handleCancelEdit = (todo: TodoModel) => {
+  const handleCancelEdit = (todo: Todo) => {
     setEditMode((prev) => ({ ...prev, [todo.id]: false }));
   };
 
-  const handleBlur = (todo: TodoModel) => {
+  const handleBlur = (todo: Todo) => {
     handleSaveTodo(todo);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, todo: TodoModel) => {
+  const handleKeyDown = (e: React.KeyboardEvent, todo: Todo) => {
     if (e.key === 'Escape') {
       handleCancelEdit(todo);
+    }
+
+    if (e.key === 'Enter') {
+      handleSaveTodo(todo);
     }
   };
 
@@ -83,45 +86,49 @@ export const TodoList = () => {
   return (
     <div className="flex flex-col gap-2 bg-white shadow-md p-4">
       <h1>Todos</h1>
-      {status === 'loading' && <p>Loading...</p>}
       {status === 'failed' && <p>{errors.load}</p>}
-      {status === 'succeeded' && (
-        <ul className="divide-y">
-          {sortedTodos.map((todo) => (
-            <li key={todo.id} className="py-2 flex">
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => {
-                  onCheckComplete(todo);
-                }}
-                className="mr-2"
-              />
-              {editMode[todo.id] ? (
+
+      <ul className="divide-y">
+        {sortedTodos.map((todo) => (
+          <li key={todo.id} className="py-2 flex items-center min-h-14">
+            {isLoading.includes(todo.id) ? (
+              <p>Loading...</p>
+            ) : (
+              <>
                 <input
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 p-2"
-                  type="text"
-                  autoFocus
-                  value={todoValues[todo.id]}
-                  onChange={(e) => handleChange(e, todo.id.toString())}
-                  onBlur={() => handleBlur(todo)}
-                  onKeyDown={(e) => handleKeyDown(e, todo)}
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => {
+                    onCheckComplete(todo);
+                  }}
+                  className="mr-2"
                 />
-              ) : (
-                <p>{todo.title}</p>
-              )}
-              <div className="flex gap-2 ml-auto pl-2">
-                <button onClick={() => handleEditTodo(todo)}>
-                  <FontAwesomeIcon icon={faEdit} />
-                </button>
-                <button>
-                  <FontAwesomeIcon icon={faTimes} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+                {editMode[todo.id] ? (
+                  <input
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 p-2"
+                    type="text"
+                    autoFocus
+                    value={todoValues[todo.id]}
+                    onChange={(e) => handleChange(e, todo.id.toString())}
+                    onBlur={() => handleBlur(todo)}
+                    onKeyDown={(e) => handleKeyDown(e, todo)}
+                  />
+                ) : (
+                  <p>{todo.title}</p>
+                )}
+                <div className="flex gap-2 ml-auto pl-2">
+                  <button onClick={() => handleEditTodo(todo)}>
+                    <FontAwesomeIcon icon={faEdit} />
+                  </button>
+                  <button>
+                    <FontAwesomeIcon icon={faTimes} />
+                  </button>
+                </div>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

@@ -6,7 +6,7 @@ import { TodoPayload } from '../../types/todo.types';
 
 export const TodoForm = () => {
   const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.todos);
+  const { isAdding } = useAppSelector((state) => state.todos);
   const { user } = useAppSelector((state) => state.sessionData);
 
   const {
@@ -30,20 +30,25 @@ export const TodoForm = () => {
           type="text"
           placeholder="Enter your todo title"
           defaultValue={''}
-          {...register('title', { required: 'Todo title is required', pattern: {
-            value: /\S+/,
-            message: 'Todo title cannot be an empty string',
-          }, })}
+          {...register('title', {
+            required: 'Todo title is required',
+            pattern: {
+              value: /\S+/,
+              message: 'Todo title cannot be an empty string',
+            },
+          })}
         />
         <button
-          className="flex justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="flex justify-center min-w-40 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           type="submit"
         >
-          {isLoading ? 'Submitting...' : 'Submit'}
+          {isAdding ? 'Submitting...' : 'Submit'}
         </button>
       </form>
       {errors.title && (
-        <span className="mt-2 text-sm text-red-500 ">{errors.title.message}</span>
+        <span className="mt-2 text-sm text-red-500 ">
+          {errors.title.message}
+        </span>
       )}
     </>
   );

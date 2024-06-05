@@ -1,6 +1,6 @@
-import { TodoModel, Todo } from '../types/todo.types';
+import { Todo } from '../types/todo.types';
 
-export const mapTodoResponse = (todo: TodoModel): Todo => {
+export const mapTodoResponse = (todo: Todo): Todo => {
   const mapped: Partial<Todo> = {
     id: todo.id,
     userId: todo.userId,

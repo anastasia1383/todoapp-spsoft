@@ -3,7 +3,7 @@ import { Todo } from '../types/todo.types';
 const sortByUpdatedAt = (a: Todo, b: Todo) => {
   const aValue = a.updatedAt ? +a.updatedAt : +a.createdAt;
   const bValue = b.updatedAt ? +b.updatedAt : +b.createdAt;
-
+  
   return aValue - bValue;
 };
 

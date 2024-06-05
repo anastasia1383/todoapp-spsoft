@@ -1,11 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import type {
-  GetTodosPayload,
-  TodoModel,
-  Todo,
-  TodoPayload,
-} from '../types/todo.types';
+import type { GetTodosPayload, Todo, TodoPayload } from '../types/todo.types';
 import {
   addTodos,
   deleteTodos,
@@ -25,7 +20,8 @@ export type TodosState = {
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   errors: TodoStateErrors;
   shouldLoadTodos: boolean;
-  isLoading: boolean;
+  isLoading: number[];
+  isAdding: boolean;
 };
 
 const initialState: TodosState = {
@@ -38,7 +34,8 @@ const initialState: TodosState = {
     remove: null,
   },
   shouldLoadTodos: true,
-  isLoading: false,
+  isLoading: [],
+  isAdding: false,
 };
 
 export const fetchTodos = createAsyncThunk<
@@ -71,10 +68,10 @@ export const createTodo = createAsyncThunk<
 
 export const editTodo = createAsyncThunk<
   Todo,
-  {todo: Partial<TodoModel>, updateDate: boolean},
+  { todo: Partial<Todo>; updateDate: boolean },
   { rejectValue: string }
 >('todos/editTodo', async (payload, { rejectWithValue }) => {
-  const { todo, updateDate  } = payload;
+  const { todo, updateDate } = payload;
 
   try {
     const data = await updateTodos(todo, updateDate);
@@ -82,7 +79,7 @@ export const editTodo = createAsyncThunk<
     return data;
   } catch (e: unknown) {
     const error = e as Error;
-    
+
     return rejectWithValue(error.message);
   }
 });
@@ -122,40 +119,40 @@ const todosSlice = createSlice({
       .addCase(fetchTodos.pending, (state) => {
         state.status = 'loading';
         state.errors.load = null;
-        state.isLoading = true;
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.todos = action.payload;
         state.errors.load = null;
         state.shouldLoadTodos = false;
-        state.isLoading = false;
       })
       .addCase(fetchTodos.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.load = action.payload || 'Failed to fetch todos';
-        state.isLoading = false;
       })
       .addCase(createTodo.pending, (state) => {
         state.status = 'loading';
         state.errors.create = null;
-        state.isLoading = true;
+        state.isAdding = true;
       })
       .addCase(createTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.todos.push(action.payload);
         state.errors.create = null;
-        state.isLoading = false;
+        state.isAdding = false;
       })
       .addCase(createTodo.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.create = action.payload || 'Failed to create todo';
-        state.isLoading = false;
+        state.isAdding = false;
       })
-      .addCase(editTodo.pending, (state) => {
+      .addCase(editTodo.pending, (state, action) => {
         state.status = 'loading';
         state.errors.update = null;
-        state.isLoading = true;
+        const todoId = action.meta.arg.todo.id;
+        if (todoId !== undefined) {
+          state.isLoading.push(todoId);
+        }
       })
       .addCase(editTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
@@ -166,17 +163,16 @@ const todosSlice = createSlice({
           state.todos[index] = action.payload;
         }
         state.errors.update = null;
-        state.isLoading = false;
+        const todoId = action.payload.id;
+        state.isLoading = state.isLoading.filter((id) => id !== todoId);
       })
       .addCase(editTodo.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.update = action.payload || 'Failed to edit todo';
-        state.isLoading = false;
       })
       .addCase(removeTodo.pending, (state) => {
         state.status = 'loading';
         state.errors.remove = null;
-        state.isLoading = true;
       })
       .addCase(removeTodo.fulfilled, (state, action) => {
         state.status = 'succeeded';
@@ -184,12 +180,10 @@ const todosSlice = createSlice({
           (todo) => todo.id !== action.payload.id
         );
         state.errors.remove = null;
-        state.isLoading = false;
       })
       .addCase(removeTodo.rejected, (state, action) => {
         state.status = 'failed';
         state.errors.remove = action.payload || 'Failed to delete todo';
-        state.isLoading = false;
       });
   },
 });
