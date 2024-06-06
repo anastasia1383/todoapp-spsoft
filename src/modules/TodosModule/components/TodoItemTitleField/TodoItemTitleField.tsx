@@ -1,4 +1,4 @@
-import { Todo } from '../../types/todo.types';
+import { Todo } from '../../../../types/todo.types';
 
 interface TodoItemTitleFieldProps {
   todo: Todo;

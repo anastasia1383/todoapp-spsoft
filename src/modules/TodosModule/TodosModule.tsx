@@ -1,11 +1,10 @@
-import { TodoForm } from '../../components/TodoForm/TodoForm';
-import { TodoList } from '../../components/TodoList/TodoList';
+import { TodoForm } from './components/TodoForm/TodoForm';
+import { TodoList } from './components/TodoList/TodoList';
 import usePermissions from '../../hooks/usePermissions';
 import { useAppSelector } from '../../store/store';
 
 export const TodosModule = () => {
   const editingMode = useAppSelector((state) => state.settings.editingMode);
-
   const { canEdit } = usePermissions();
 
   return (

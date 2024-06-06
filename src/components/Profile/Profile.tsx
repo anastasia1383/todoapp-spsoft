@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 
 import { logout } from '../../store/auth.slice';
 import { useAppDispatch, useAppSelector } from '../../store/store';
-import { checkUserPermissions, resetPermissions } from '../../store/permissions.slice';
+import {
+  checkUserPermissions,
+  resetPermissions,
+} from '../../store/permissions.slice';
 import { reset } from '../../store/todos.slice';
 import { Switcher } from '../Switcher/Switcher';
 import { GuardedActions } from '../../types/user.types';
@@ -18,12 +21,23 @@ export const Profile = () => {
   const user = useAppSelector((state) => state.sessionData.user);
   const { permissions, error } = useAppSelector((state) => state.permissions);
   const isEditMode = useAppSelector((state) => state.settings.editingMode);
-  
+  const { canEdit } = usePermissions();
+
   const handleLogout = () => {
     dispatch(logout());
     dispatch(reset());
     dispatch(resetPermissions());
     dispatch(resetEditingMode());
+  };
+
+  const handleCheckboxChange = () => {
+    setSwitcherTouched(true);
+    if (!isEditMode) {
+      setPermissionsRequested(true);
+    } else {
+      dispatch(setEditingMode(false));
+      setPermissionsRequested(false);
+    }
   };
 
   useEffect(() => {
@@ -37,8 +51,6 @@ export const Profile = () => {
     }
   }, [permissionsRequested]);
 
-  const { canEdit } = usePermissions();
-
   useEffect(() => {
     if (permissionsRequested && canEdit) {
       dispatch(setEditingMode(true));
@@ -46,16 +58,6 @@ export const Profile = () => {
       dispatch(setEditingMode(false));
     }
   }, [permissionsRequested, permissions, dispatch]);
-
-  const handleCheckboxChange = () => {
-    setSwitcherTouched(true);
-    if (!isEditMode) {
-      setPermissionsRequested(true);
-    } else {
-      dispatch(setEditingMode(false));
-      setPermissionsRequested(false);
-    }
-  };
 
   return (
     <div className="flex flex-col gap-2 fixed top-0 right-0 min-w-96 bg-white shadow-md p-4">
@@ -73,7 +75,9 @@ export const Profile = () => {
       {switcherTouched && (
         <div className="flex flex-col gap-2">
           {!!permissions.length && (
-            <p className="text-green-500">{`You have permission to ${permissions.join(', ')} this list`}</p>
+            <p className="text-green-500">{`You have permission to ${permissions.join(
+              ', '
+            )} this list`}</p>
           )}
           {error && <p className="text-red-500">{error}</p>}
         </div>

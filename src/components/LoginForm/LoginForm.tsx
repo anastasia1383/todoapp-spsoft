@@ -9,7 +9,9 @@ import { login } from '../../store/auth.slice';
 export const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isLoggedIn, isLoading, error } = useAppSelector((state: RootState) => state.sessionData);
+  const { isLoggedIn, isLoading, error } = useAppSelector(
+    (state: RootState) => state.sessionData
+  );
 
   const {
     register,
@@ -70,7 +72,11 @@ export const LoginForm = () => {
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </button>
-            {errors.email && <span className="mt-2 text-sm text-red-500 ">{errors.email.message}</span>}
+            {errors.email && (
+              <span className="mt-2 text-sm text-red-500 ">
+                {errors.email.message}
+              </span>
+            )}
           </div>
         </form>
       </div>
