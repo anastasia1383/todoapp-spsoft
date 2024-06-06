@@ -2,11 +2,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import { type User, type UserCredentials } from '../types/user.types';
 import { getUser } from '../services/usersService';
+import { Status } from '../types/status.enum';
 
 export type AuthState = {
   isLoggedIn: boolean;
   user: User | null;
-  status: 'idle' | 'succeeded' | 'loading' | 'failed';
+  status: Status;
   error: string | null;
   isLoading: boolean;
 };
@@ -31,7 +32,7 @@ export const login = createAsyncThunk<
 const initialState: AuthState = {
   isLoggedIn: false,
   user: null,
-  status: 'idle',
+  status: Status.Idle,
   error: null,
   isLoading: false,
 };
@@ -44,32 +45,32 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       state.user = null;
       state.error = null;
-      state.status = 'idle';
+      state.status = Status.Idle;
     },
     initializeAuthState: (state, action) => {
       const userData = action.payload;
       if (userData) {
         state.isLoggedIn = true;
         state.user = userData;
-        state.status = 'succeeded';
+        state.status = Status.Succeeded;
       }
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(login.pending, (state) => {
-        state.status = 'loading';
+        state.status = Status.Loading;
         state.isLoading = true;
         state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = Status.Succeeded;
         state.user = action.payload;
         state.isLoading = false;
         state.isLoggedIn = true;
       })
       .addCase(login.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = Status.Failed;
         state.error = action.payload || 'Authorization failed';
         state.isLoading = false;
         state.isLoggedIn = false;

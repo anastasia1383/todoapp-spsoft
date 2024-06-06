@@ -7,6 +7,7 @@ import {
   getTodos,
   updateTodos,
 } from '../services/todosService';
+import { Status } from '../types/status.enum';
 
 export type TodoStateErrors = {
   load: string | null;
@@ -17,7 +18,7 @@ export type TodoStateErrors = {
 
 export type TodosState = {
   todos: Todo[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  status: Status;
   errors: TodoStateErrors;
   shouldLoadTodos: boolean;
   isLoading: number[];
@@ -26,7 +27,7 @@ export type TodosState = {
 
 const initialState: TodosState = {
   todos: [],
-  status: 'idle',
+  status: Status.Idle,
   errors: {
     load: null,
     create: null,
@@ -104,7 +105,7 @@ const todosSlice = createSlice({
   reducers: {
     reset: (state) => {
       state.todos = [];
-      state.status = 'idle';
+      state.status = Status.Idle;
       state.errors = {
         load: null,
         create: null,
@@ -117,37 +118,37 @@ const todosSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchTodos.pending, (state) => {
-        state.status = 'loading';
+        state.status = Status.Loading;
         state.errors.load = null;
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = Status.Succeeded;
         state.todos = action.payload;
         state.errors.load = null;
         state.shouldLoadTodos = false;
       })
       .addCase(fetchTodos.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = Status.Failed;
         state.errors.load = action.payload || 'Failed to fetch todos';
       })
       .addCase(createTodo.pending, (state) => {
-        state.status = 'loading';
+        state.status = Status.Loading;
         state.errors.create = null;
         state.isAdding = true;
       })
       .addCase(createTodo.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = Status.Succeeded;
         state.todos.push(action.payload);
         state.errors.create = null;
         state.isAdding = false;
       })
       .addCase(createTodo.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = Status.Failed;
         state.errors.create = action.payload || 'Failed to create todo';
         state.isAdding = false;
       })
       .addCase(editTodo.pending, (state, action) => {
-        state.status = 'loading';
+        state.status = Status.Loading;
         state.errors.update = null;
         const todoId = action.meta.arg.todo.id;
         if (todoId !== undefined) {
@@ -155,7 +156,7 @@ const todosSlice = createSlice({
         }
       })
       .addCase(editTodo.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = Status.Succeeded;
         const index = state.todos.findIndex(
           (todo) => todo.id === action.payload.id
         );
@@ -167,11 +168,11 @@ const todosSlice = createSlice({
         state.isLoading = state.isLoading.filter((id) => id !== todoId);
       })
       .addCase(editTodo.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = Status.Failed;
         state.errors.update = action.payload || 'Failed to edit todo';
       })
       .addCase(removeTodo.pending, (state, action) => {
-        state.status = 'loading';
+        state.status = Status.Loading;
         state.errors.remove = null;
         const todoId = action.meta.arg.id;
         if (todoId !== undefined) {
@@ -179,7 +180,7 @@ const todosSlice = createSlice({
         }
       })
       .addCase(removeTodo.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = Status.Succeeded;
         const index = state.todos.findIndex(
           (todo) => todo.id === action.payload.id
         );
@@ -191,7 +192,7 @@ const todosSlice = createSlice({
         state.errors.remove = null;
       })
       .addCase(removeTodo.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = Status.Failed;
         state.errors.remove = action.payload || 'Failed to delete todo';
       });
   },

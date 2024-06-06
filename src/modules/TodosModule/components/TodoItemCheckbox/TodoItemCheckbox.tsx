@@ -1,4 +1,4 @@
-import { Todo } from '../../types/todo.types';
+import { Todo } from '../../../../types/todo.types';
 
 interface TodoItemCheckboxProps {
   todo: Todo;
@@ -17,6 +17,7 @@ export const TodoItemCheckbox: React.FC<TodoItemCheckboxProps> = ({
 
     updateTodo(updatePayload, true);
   };
+  
   return (
     <input
       type="checkbox"
@@ -25,7 +26,7 @@ export const TodoItemCheckbox: React.FC<TodoItemCheckboxProps> = ({
         onCheckComplete(todo);
       }}
       className="mr-2"
-      disabled={todo.deleted === true}
+      disabled={todo.deleted}
     />
   );
 };

@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form';
 
-import { useAppDispatch, useAppSelector } from '../../store/store';
-import { createTodo } from '../../store/todos.slice';
-import { TodoPayload } from '../../types/todo.types';
+import { useAppDispatch, useAppSelector } from '../../../../store/store';
+import { createTodo } from '../../../../store/todos.slice';
+import { TodoPayload } from '../../../../types/todo.types';
 
 export const TodoForm = () => {
   const dispatch = useAppDispatch();
