@@ -7,6 +7,7 @@ import { reset } from '../../store/todos.slice';
 import { Switcher } from '../Switcher/Switcher';
 import { GuardedActions } from '../../types/user.types';
 import { resetEditingMode, setEditingMode } from '../../store/setting.slice';
+import usePermissions from '../../hooks/usePermissions';
 
 export const Profile = () => {
   const [permissionsRequested, setPermissionsRequested] = useState(false);
@@ -36,8 +37,10 @@ export const Profile = () => {
     }
   }, [permissionsRequested]);
 
+  const { canEdit } = usePermissions();
+
   useEffect(() => {
-    if (permissionsRequested && permissions.includes(GuardedActions.EDIT)) {
+    if (permissionsRequested && canEdit) {
       dispatch(setEditingMode(true));
     } else {
       dispatch(setEditingMode(false));
