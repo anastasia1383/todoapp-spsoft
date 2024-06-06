@@ -4,10 +4,10 @@ import classNames from 'classnames';
 import { RootState, useAppDispatch, useAppSelector } from '../../store/store';
 import { editTodo, removeTodo } from '../../store/todos.slice';
 import { Todo } from '../../types/todo.types';
-import { GuardedActions } from '../../types/user.types';
 import { TodoItemActions } from '../TodoItemActions/TodoItemActions';
 import { TodoItemTitleField } from '../TodoItemTitleField/TodoItemTitleField';
 import { TodoItemCheckbox } from '../TodoItemCheckbox/TodoItemCheckbox';
+import usePermissions from '../../hooks/usePermissions';
 
 interface TodoItemProps {
   todo: Todo;
@@ -38,9 +38,8 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   };
 
   const editingMode = useAppSelector((state) => state.settings.editingMode);
-  const permissions = useAppSelector((state) => state.permissions.permissions);
 
-  const hasEditPermission = permissions.includes(GuardedActions.EDIT);
+  const { canEdit } = usePermissions();
 
   return (
     <li
@@ -64,7 +63,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
             setEditForTodoId={setEditForTodoId}
           />
 
-          {todo.deleted === false && editingMode && hasEditPermission && (
+          {todo.deleted === false && editingMode && canEdit && (
             <TodoItemActions
               todo={todo}
               handleEditTodo={handleEditTodo}
